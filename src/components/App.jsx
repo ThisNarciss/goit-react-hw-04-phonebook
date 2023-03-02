@@ -18,11 +18,7 @@ export function App() {
   }, [contacts]);
 
   const onBtnDeleteClick = id => {
-    setContacts(() => {
-      const filteredContacts = contacts.filter(contact => contact.id !== id);
-
-      return filteredContacts;
-    });
+    setContacts(state => state.filter(contact => contact.id !== id));
   };
 
   const addNewContact = obj => {
@@ -44,16 +40,15 @@ export function App() {
 
     Notify.success(`${obj.name} add to the contacts`);
 
-    setContacts([...contacts, { id: nanoid(), ...obj }]);
+    setContacts(state => [...state, { id: nanoid(), ...obj }]);
   };
 
   const filterContacts = name => setFilter(name);
 
-  const getFilteredContacts = (filterName, contacts) => {
-    return contacts.filter(item => {
-      return item.name.toLowerCase().includes(filterName.toLowerCase());
-    });
-  };
+  const getFilteredContacts = (filterName, contacts) =>
+    contacts.filter(item =>
+      item.name.toLowerCase().includes(filterName.toLowerCase())
+    );
 
   const filteredContacts = getFilteredContacts(filter, contacts);
 
