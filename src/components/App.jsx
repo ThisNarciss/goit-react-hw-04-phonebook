@@ -1,5 +1,5 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { Section } from 'components/Section/Section';
 import { ContactForm } from 'components/ContactForm/ContactForm';
 import { ContactList } from 'components/ContactList/ContactList';
@@ -7,35 +7,25 @@ import { Filter } from 'components/Filter/Filter';
 import { ChildrenBox, Container, Notification } from './App.styled';
 import { nanoid } from 'nanoid';
 
-export class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
-  };
+export function App() {
+  const [contacts, setContacts] = useState(
+    () => JSON.parse(localStorage.getItem('contacts')) ?? []
+  );
+  const [filter, setFilter] = useState('');
 
-  componentDidMount() {
-    const parseData = JSON.parse(localStorage.getItem('contacts'));
-    if (parseData) {
-      this.setState({ contacts: parseData });
-    }
-  }
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.contacts !== prevState.contacts) {
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-    }
-  }
+  const onBtnDeleteClick = id => {
+    setContacts(() => {
+      const filteredContacts = contacts.filter(contact => contact.id !== id);
 
-  onBtnDeleteClick = id => {
-    this.setState(prevState => {
-      const contacts = prevState.contacts.filter(contact => contact.id !== id);
-
-      return { contacts };
+      return filteredContacts;
     });
   };
 
-  addNewContact = obj => {
-    const { contacts } = this.state;
+  const addNewContact = obj => {
     const findName = contacts.find(
       ({ name }) => name.toLowerCase() === obj.name.toLowerCase()
     );
@@ -54,41 +44,37 @@ export class App extends Component {
 
     Notify.success(`${obj.name} add to the contacts`);
 
-    this.setState(prevState => ({
-      contacts: [...prevState.contacts, { id: nanoid(), ...obj }],
-    }));
+    setContacts([...contacts, { id: nanoid(), ...obj }]);
   };
 
-  filterContacts = name => this.setState({ filter: name });
+  const filterContacts = name => setFilter(name);
 
-  getFilteredContacts(filterName, contacts) {
+  const getFilteredContacts = (filterName, contacts) => {
     return contacts.filter(item => {
       return item.name.toLowerCase().includes(filterName.toLowerCase());
     });
-  }
+  };
 
-  render() {
-    const { contacts, filter } = this.state;
-    const filteredContacts = this.getFilteredContacts(filter, contacts);
-    return (
-      <Container>
-        <Section title="Phonebook">
-          <ContactForm onSubmit={this.addNewContact} />
-        </Section>
-        <Section title="Contacts">
-          {contacts.length ? (
-            <ChildrenBox>
-              <Filter onChange={this.filterContacts} />
-              <ContactList
-                contactList={filteredContacts}
-                onBtnClick={this.onBtnDeleteClick}
-              />
-            </ChildrenBox>
-          ) : (
-            <Notification>There are no contacts in the phone book</Notification>
-          )}
-        </Section>
-      </Container>
-    );
-  }
+  const filteredContacts = getFilteredContacts(filter, contacts);
+
+  return (
+    <Container>
+      <Section title="Phonebook">
+        <ContactForm onSubmit={addNewContact} />
+      </Section>
+      <Section title="Contacts">
+        {contacts.length ? (
+          <ChildrenBox>
+            <Filter onChange={filterContacts} />
+            <ContactList
+              contactList={filteredContacts}
+              onBtnClick={onBtnDeleteClick}
+            />
+          </ChildrenBox>
+        ) : (
+          <Notification>There are no contacts in the phone book</Notification>
+        )}
+      </Section>
+    </Container>
+  );
 }

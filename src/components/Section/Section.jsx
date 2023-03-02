@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types';
-import { Component } from 'react';
 import { SectionBox, Title, TitleBox, IconPhone } from './Section.styled';
 
 export function Section({ title, children }) {
