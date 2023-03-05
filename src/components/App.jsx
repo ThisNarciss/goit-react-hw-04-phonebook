@@ -40,10 +40,8 @@ export function App() {
 
     Notify.success(`${obj.name} add to the contacts`);
 
-    setContacts(state => [...state, { id: nanoid(), ...obj }]);
+    setContacts(prevContacts => [...prevContacts, { id: nanoid(), ...obj }]);
   };
-
-  const filterContacts = name => setFilter(name);
 
   const getFilteredContacts = (filterName, contacts) =>
     contacts.filter(item =>
@@ -60,7 +58,7 @@ export function App() {
       <Section title="Contacts">
         {contacts.length ? (
           <ChildrenBox>
-            <Filter onChange={filterContacts} />
+            <Filter onChange={setFilter} />
             <ContactList
               contactList={filteredContacts}
               onBtnClick={onBtnDeleteClick}
